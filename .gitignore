@@ -1,0 +1,9 @@
+.DS_Store
+.audit-backups/
+__pycache__/
+*.py[cod]
+.venv/
+/检查报告.md
+# Official MiniMax reference snapshots stay local; see SOURCE.md for upstream links.
+manju-h3/references/official/base-en.txt
+manju-h3/references/official/ref-en.txt

@@ -1,0 +1,189 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>凡人修仙 · 四宫格提示词预览示例</title><style>:root {
+  color-scheme: light;
+  --paper: #eceded;
+  --panel: #f5f6f5;
+  --side: #e4e6e3;
+  --ink: #191d21;
+  --ink-2: #515a61;
+  --ink-3: #626b70;
+  --rule: #d2d5d0;
+  --rule-2: #bfc5be;
+  --seal: #8a3324;
+  --seal-dark: #6f281d;
+  --seal-soft: #f3e9e6;
+  --ok: #3d6b4f;
+  --serif: "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif CJK SC", Georgia, serif;
+  --sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.7 var(--sans); -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+a { color: var(--seal-dark); }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--seal); outline-offset: 3px; }
+
+.shell { max-width: 1480px; margin: auto; padding: 24px 32px 72px; }
+.mast { border-bottom: 2px solid var(--ink); padding-bottom: 14px; }
+.mast-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.eyebrow { margin: 0 0 5px; color: var(--seal); font: 600 11px/1.3 var(--sans); letter-spacing: .17em; }
+.mast h1 { margin: 0; font: 400 clamp(25px, 2.7vw, 35px)/1.24 var(--serif); letter-spacing: .04em; overflow-wrap: anywhere; }
+.status { flex: none; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--ok); color: var(--ok); background: var(--panel); padding: 5px 10px; border-radius: 2px; font: 600 11px/1.2 var(--sans); }
+.status::before { content: "✓"; font-weight: 700; }
+.subtitle { margin: 8px 0 0; color: var(--ink-2); font-size: 13px; overflow-wrap: anywhere; }
+.metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 30px; }
+.metric { min-width: 0; background: var(--panel); border: 1px solid var(--rule); border-top: 2px solid var(--rule-2); border-radius: 2px; padding: 10px 14px 12px; }
+.metric:first-child { border-top-color: var(--seal); }
+.metric-label { display: block; color: var(--ink-3); font: 600 10px/1.3 var(--sans); letter-spacing: .14em; }
+.metric-value { display: block; margin-top: 4px; font: 400 27px/1.1 var(--serif); }
+.metric-detail { display: block; margin-top: 3px; color: var(--ink-2); font-size: 11px; }
+
+.toolbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin: 0 0 14px; padding-bottom: 9px; border-bottom: 1px solid var(--rule-2); }
+.toolbar h2, .foot h2 { margin: 0; font: 400 20px/1.25 var(--serif); letter-spacing: .04em; }
+.section-no { margin-right: 10px; color: var(--seal); font: 600 11px/1 var(--mono); letter-spacing: .03em; }
+.visible { margin-left: 5px; font: 500 12px/1.3 var(--sans); color: var(--ink-3); letter-spacing: 0; }
+.search { width: min(100%, 320px); min-height: 38px; border: 1px solid var(--rule-2); background: var(--panel); border-radius: 2px; color: var(--ink); padding: 8px 11px; }
+.search::placeholder { color: var(--ink-3); }
+.search:focus { border-color: var(--seal); }
+
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.cards.single { grid-template-columns: minmax(0, 1fr); }
+.card { min-width: 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 2px; overflow: hidden; }
+.card-head { padding: 16px 20px 14px; border-bottom: 1px solid var(--rule-2); }
+.card-id { color: var(--seal); font: 500 21px/1.2 var(--serif); letter-spacing: .04em; }
+.card h3 { margin: 6px 0 0; font: 400 18px/1.35 var(--serif); letter-spacing: .03em; overflow-wrap: anywhere; }
+.summary { margin: 9px 0 0; color: var(--ink-2); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; margin: 0; padding: 5px 20px 12px; }
+.field { min-width: 0; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+.field dt { color: var(--seal); font: 600 11px/1.6 var(--sans); letter-spacing: .07em; }
+.field dd { margin: 3px 0 0; color: var(--ink-2); font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.prompt { border-top: 1px solid var(--rule-2); padding: 15px 20px 18px; }
+.prompt-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.prompt h4 { margin: 0; font: 500 14px/1.4 var(--serif); letter-spacing: .04em; overflow-wrap: anywhere; }
+.copy { flex: none; min-width: 62px; min-height: 34px; border: 1px solid var(--rule-2); border-radius: 2px; background: var(--paper); color: var(--ink-2); font: 600 12px/1 var(--sans); padding: 8px 12px; transition: border-color .18s ease, color .18s ease, background .18s ease; }
+.copy:hover { border-color: var(--seal); color: var(--seal); background: var(--seal-soft); }
+.copy:active { background: var(--side); }
+.copy[disabled] { opacity: .65; cursor: wait; }
+pre { margin: 0; max-height: 420px; overflow: auto; padding: 13px 15px; border: 1px solid var(--rule); border-left: 2px solid var(--seal); border-radius: 2px; background: #fafbfa; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; font: 12.5px/1.8 var(--mono), var(--sans); }
+.notes { margin: 0; padding: 10px 20px 17px 36px; border-top: 1px solid var(--rule); color: var(--ink-2); font-size: 12px; }
+.notes li + li { margin-top: 5px; }
+
+.foot { margin-top: 30px; padding: 19px 2px 0; border-top: 1px solid var(--rule-2); }
+.foot h2 { font-size: 18px; }
+.foot ul { margin: 13px 0; padding-left: 20px; color: var(--ink-2); }
+.foot li + li { margin-top: 5px; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+.links a { display: inline-flex; align-items: center; min-height: 34px; padding: 6px 11px; border: 1px solid var(--rule-2); border-radius: 2px; background: var(--panel); color: var(--ink-2); font-size: 12px; text-decoration: none; transition: border-color .18s ease, color .18s ease; }
+.links a:hover { border-color: var(--seal); color: var(--seal); }
+.empty { display: none; padding: 28px; border: 1px dashed var(--rule-2); text-align: center; color: var(--ink-2); }
+.empty.show { display: block; }
+.toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); max-width: calc(100vw - 28px); border: 1px solid var(--seal); border-radius: 2px; background: var(--panel); color: var(--seal-dark); padding: 8px 13px; font-size: 12px; box-shadow: 0 8px 24px #191d2126; opacity: 0; pointer-events: none; transition: opacity .18s ease; }
+.toast.show { opacity: 1; }
+
+@media (max-width: 1100px) { .cards { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 700px) {
+  .shell { padding: 16px 14px 52px; }
+  .mast-top { align-items: flex-start; }
+  .mast h1 { font-size: 26px; }
+  .status { margin-top: 2px; }
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 14px 0 25px; }
+  .metric:last-child { grid-column: 1 / -1; }
+  .toolbar { align-items: stretch; flex-direction: column; gap: 10px; }
+  .search { width: 100%; }
+  .card-head, .prompt { padding-left: 16px; padding-right: 16px; }
+  .fields { padding-left: 16px; padding-right: 16px; }
+  pre { max-height: 440px; }
+}
+@media (max-width: 460px) { .fields { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style></head><body><main class="shell"><header class="mast"><div class="mast-top"><div><p class="eyebrow">MANJU / manju-fj</p><h1>凡人修仙 · 四宫格提示词预览示例</h1><p class="subtitle">第1集-01，15秒。此文件用于预览 H5 展示和复制交互。</p></div><span class="status">离线预览</span></div></header><div class="metrics" aria-label="文档统计"><div class="metric"><span class="metric-label">内容条目</span><strong class="metric-value">1</strong><span class="metric-detail">当前文档范围</span></div><div class="metric"><span class="metric-label">可复制提示词</span><strong class="metric-value">1</strong><span class="metric-detail">逐条独立复制</span></div><div class="metric"><span class="metric-label">来源文件</span><strong class="metric-value">1</strong><span class="metric-detail">以 JSON 所列为准</span></div></div><div class="toolbar"><h2><span class="section-no">01</span>内容与提示词 <span class="visible">匹配 <span id="visible-count">1</span> 项</span></h2><input id="search" class="search" type="search" placeholder="搜索人物、场景、镜头或提示词" aria-label="搜索内容"></div><div class="cards single"><article class="card"><div class="card-head"><span class="card-id">01-01</span><h3>第1集-01｜房门开启</h3><p class="summary">墨大夫在房内听到脚步声，走向南门并推开；韩立沿门外道路接近。</p></div><dl class="fields"><div class="field"><dt>场景</dt><dd>秋初午后，房内与门外道路</dd></div><div class="field"><dt>分镜</dt><dd>4镜，共15秒</dd></div><div class="field"><dt>参考图</dt><dd>人物2张，场景1张</dd></div></dl><section class="prompt"><div class="prompt-head"><h4>四宫格绘图 Prompt</h4><button class="copy" type="button" data-copy="prompt-0-0" aria-label="复制四宫格绘图 Prompt">复制</button></div><pre id="prompt-0-0"><code>生成一张横向2×2四宫格分镜图，依次表现同一段故事的四个关键瞬间。
+
+@图一是墨大夫形象参考图
+@图二是韩立形象参考图
+@图三是房间场景参考图
+
+故事概况：初秋白天，墨大夫在房内听见门外渐近的脚步，从太师椅所在处走到房门前并推开门。韩立沿门外道路缓慢走近。
+
+固定空间关系：太师椅在房内西侧，房门在南侧，门外道路由南通向房门。韩立沿道路向北接近；墨大夫从房内西侧走向南门，最后停在门内东侧。摄影机保持在两人南北行动轴线同侧。
+
+左上：墨大夫在房内西侧的太师椅处，尚未走向关闭的南门，视线落向门口。韩立仍在门外远处。
+
+右上：墨大夫听见脚步后从太师椅处起身，沿房内路径走向南门；门仍关闭。韩立继续沿门外道路靠近。
+
+左下：墨大夫已到南门内侧，右手正在推开门扇。韩立仍在门外道路上。
+
+右下：南门已开启。墨大夫停在门内东侧，面朝南方的韩立，嘴角挤出笑容；韩立在门外约两步处，朝北靠近。太师椅仍在房内西侧。
+
+人物外貌和场景结构以参考图为准。四格人物不瞬移，太师椅不换位，门的开合状态连续。每格只呈现一个静态瞬间。无第三人、无文字、无字幕、无水印。</code></pre></section><ul class="notes"><li>参考图编号按实际上传顺序核对。</li></ul></article></div><p class="empty" id="empty">没有匹配内容，请查看核对记录。</p><footer class="foot"><h2><span class="section-no">02</span>核对记录</h2><ul><li>示例内容演示 H5 预览；实际运行时由各 Skill 根据用户输入生成。</li></ul><div class="links"><a href="%E7%AC%AC1%E9%9B%86-01_manju-fj.md" download>下载 Markdown</a><a href="%E7%AC%AC1%E9%9B%86-01_manju-fj.json" download>下载 JSON</a></div></footer></main><div id="toast" class="toast" role="status" aria-live="polite"></div><script>
+const search = document.getElementById('search');
+const cards = [...document.querySelectorAll('.card')];
+const count = document.getElementById('visible-count');
+const empty = document.getElementById('empty');
+const toast = document.getElementById('toast');
+let toastTimer;
+search.addEventListener('input', () => {
+  const query = search.value.trim().toLocaleLowerCase();
+  let visible = 0;
+  for (const card of cards) {
+    const match = card.textContent.toLocaleLowerCase().includes(query);
+    card.hidden = !match;
+    if (match) visible++;
+  }
+  count.textContent = String(visible);
+  empty.classList.toggle('show', visible === 0);
+});
+function announce(message) {
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2300);
+}
+async function copyText(value) {
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(value);
+      return;
+    } catch (_) { /* Local files may deny the modern clipboard API. */ }
+  }
+  const previousFocus = document.activeElement;
+  const area = document.createElement('textarea');
+  area.value = value;
+  area.setAttribute('readonly', '');
+  area.style.position = 'fixed';
+  area.style.opacity = '0';
+  document.body.appendChild(area);
+  let success = false;
+  try {
+    area.select();
+    area.setSelectionRange(0, value.length);
+    success = document.execCommand('copy');
+  } finally {
+    area.remove();
+    if (previousFocus && previousFocus.focus) previousFocus.focus({preventScroll:true});
+  }
+  if (!success) throw new Error('copy unavailable');
+}
+document.addEventListener('click', async (event) => {
+  const button = event.target.closest('button[data-copy]');
+  if (!button || button.disabled) return;
+  const target = document.getElementById(button.dataset.copy);
+  if (!target) return;
+  button.disabled = true;
+  button.dataset.originalLabel ||= button.textContent;
+  clearTimeout(button.copyResetTimer);
+  try {
+    await copyText(target.textContent);
+    button.textContent = '已复制';
+    announce('提示词已复制');
+  } catch (_) {
+    button.textContent = button.dataset.originalLabel;
+    announce('复制失败，请选中文本手动复制');
+  } finally {
+    button.copyResetTimer = setTimeout(() => {button.textContent = button.dataset.originalLabel;}, 1800);
+    button.disabled = false;
+  }
+});
+</script></body></html>
