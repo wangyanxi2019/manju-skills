@@ -1,23 +1,19 @@
 {
-  "version": 1,
+  "version": 2,
+  "source": "references/漫剧生图影视风格预设.md",
   "presets": [
-    {
-      "id": "xianxia_3d",
-      "name": "东方水墨修仙 3D 国漫",
-      "description": "适合已确定采用水墨修仙 3D 国漫质感的作品。",
-      "prompt": "东方水墨修仙3D国漫，3DCG质感，UE5渲染风格。高质量数字渲染，极高细节，次世代PBR材质渲染，UE5实时渲染，精致多边形建模，冷调清雅国风色调，飘逸古风衣袂布料物理效果，3D动漫风格。"
-    },
-    {
-      "id": "urban_realistic",
-      "name": "现代都市真人电影",
-      "description": "适合希望人物、服饰和都市环境保持真人写实质感的作品。",
-      "prompt": "现代都市真人电影风格，真实人物面部与皮肤纹理，自然服装材质和城市环境细节，克制的电影灯光与色彩，真实摄影镜头质感，高质量画面，人物与场景比例自然，无夸张美颜。"
-    },
-    {
-      "id": "urban_3d",
-      "name": "现代都市 3D 动画",
-      "description": "适合希望都市题材保持统一 3D 动画造型的作品。",
-      "prompt": "现代都市3D动画风格，统一的角色与城市场景设计，细腻3DCG建模，真实材质层次与布料质感，自然电影灯光，清晰空间关系，高质量数字渲染，人物造型与场景风格一致。"
-    }
+    {"id": "xianxia_3d", "number": "01", "medium": "3D 动画"},
+    {"id": "fantasy_epic_3d", "number": "02", "medium": "3D 动画"},
+    {"id": "urban_3d", "number": "03", "medium": "3D 动画"},
+    {"id": "cyberpunk_3d", "number": "04", "medium": "3D 动画"},
+    {"id": "ink_2d", "number": "05", "medium": "2D 动画"},
+    {"id": "cel_2d", "number": "06", "medium": "2D 动画"},
+    {"id": "korean_webtoon_2d", "number": "07", "medium": "2D 动画"},
+    {"id": "dark_fantasy_2d", "number": "08", "medium": "2D 动画"},
+    {"id": "urban_realistic", "number": "09", "medium": "真人电影感"},
+    {"id": "suspense_live_action", "number": "10", "medium": "真人电影感"},
+    {"id": "hongkong_neon_live_action", "number": "11", "medium": "真人电影感"},
+    {"id": "romance_live_action", "number": "12", "medium": "真人电影感"},
+    {"id": "republican_era_live_action", "number": "13", "medium": "真人电影感"}
   ]
 }

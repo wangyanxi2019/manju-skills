@@ -2,11 +2,34 @@
 """Read and save a confirmed visual style in one work's output directory."""
 import argparse
 import json
+import re
 from pathlib import Path
 
 
 CONFIG_NAME = "视觉风格配置.json"
 PRESETS_FILE = Path(__file__).with_name("style_presets.json")
+STYLE_SOURCE = Path(__file__).parent / "references" / "漫剧生图影视风格预设.md"
+
+
+def source_prompts():
+    """Extract numbered style prompts verbatim from the editable Markdown source."""
+    source = STYLE_SOURCE.read_text(encoding="utf-8")
+    pattern = re.compile(r"^### (\d{2})｜([^\n]+)\n\n```text\n([^`]+)\n```", re.MULTILINE)
+    found = {}
+    for match in pattern.finditer(source):
+        number, name, prompt = match.groups()
+        if number in found or not name.strip() or not prompt.strip():
+            raise ValueError(f"Duplicate or empty style {number}: {STYLE_SOURCE}")
+        found[number] = {"name": name.strip(), "prompt": prompt.strip()}
+    if not found:
+        raise ValueError(f"No numbered style prompts in {STYLE_SOURCE}")
+    return found
+
+
+def common_negative_prompt():
+    source = STYLE_SOURCE.read_text(encoding="utf-8")
+    match = re.search(r"^## 通用负面提示词\s*\n\s*```text\n([^`]+)\n```", source, re.MULTILINE)
+    return match.group(1).strip() if match else None
 
 
 def presets():
@@ -17,11 +40,16 @@ def presets():
     ids = [item.get("id") for item in items]
     if len(ids) != len(set(ids)) or not all(isinstance(value, str) and value for value in ids):
         raise ValueError(f"Duplicate or empty preset id: {PRESETS_FILE}")
+    source = source_prompts()
+    numbers = [item.get("number") for item in items]
+    if len(numbers) != len(set(numbers)) or set(numbers) != set(source):
+        raise ValueError(f"Preset numbers must match the Markdown source: {PRESETS_FILE}")
+    result = []
     for item in items:
-        if not all(isinstance(item.get(key), str) and item[key].strip()
-                   for key in ("name", "description", "prompt")):
+        if not isinstance(item.get("medium"), str) or not item["medium"].strip():
             raise ValueError(f"Invalid preset entry: {item.get('id')}")
-    return items
+        result.append({**item, **source[item["number"]]})
+    return result
 
 
 def load(work_dir, work_title=None):
@@ -50,13 +78,13 @@ def save(work_dir, work_title, preset_id=None, custom_prompt=None):
         match = next((item for item in presets() if item["id"] == preset_id), None)
         if match is None:
             raise ValueError(f"Unknown preset: {preset_id}")
-        prompt, chosen = match["prompt"], preset_id
+        prompt, chosen, medium = match["prompt"], preset_id, match["medium"]
     else:
-        prompt, chosen = custom_prompt.strip(), "custom"
+        prompt, chosen, medium = custom_prompt.strip(), "custom", "custom"
         if not prompt:
             raise ValueError("Custom style prompt cannot be empty")
     value = {"version": 1, "work_title": work_title.strip(), "status": "confirmed",
-             "selected_preset": chosen, "prompt": prompt}
+             "selected_preset": chosen, "medium": medium, "prompt": prompt}
     if previous == value:
         return directory / CONFIG_NAME
     directory.mkdir(parents=True, exist_ok=True)
@@ -84,7 +112,8 @@ def main():
             save(args.work_dir, args.title, args.select, custom)
         result = {"work_dir": str(args.work_dir.expanduser().resolve()),
                   "config_file": str(args.work_dir.expanduser().resolve() / CONFIG_NAME),
-                  "current": load(args.work_dir, args.title), "presets": presets()}
+                  "current": load(args.work_dir, args.title), "presets": presets(),
+                  "common_negative_prompt": common_negative_prompt()}
     except (ValueError, OSError, TypeError, json.JSONDecodeError) as exc:
         parser.error(str(exc))
     print(json.dumps(result, ensure_ascii=False, indent=2))

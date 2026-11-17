@@ -45,6 +45,7 @@ def resolve(shared_dir, project=None, work_dir=None, work_title=None):
         "style_file": str(Path(work_dir).expanduser().resolve() / CONFIG_NAME) if style else None,
         "style_prompt": style["prompt"] if style else None,
         "style_preset": style["selected_preset"] if style else None,
+        "style_medium": style.get("medium") if style else None,
         "references": references,
     }
 

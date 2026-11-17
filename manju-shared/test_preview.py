@@ -6,10 +6,13 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import render_preview as render
+import style_config
 from resolve_project import resolve
-from style_config import load as load_style, presets, save as save_style
+from style_config import (common_negative_prompt, load as load_style, presets,
+                          save as save_style, source_prompts)
 
 
 def fixture():
@@ -176,7 +179,35 @@ class PreviewTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Unknown preset'):
                 save_style(base, '都市故事', 'not_a_preset')
             self.assertEqual(load_style(base)['selected_preset'], 'custom')
-            self.assertEqual(len(presets()), 3)
+            self.assertEqual(len(presets()), 13)
+
+    def test_all_source_presets_are_available_verbatim(self):
+        source = source_prompts()
+        choices = presets()
+        self.assertEqual(set(source), {item['number'] for item in choices})
+        for item in choices:
+            with self.subTest(number=item['number']):
+                self.assertEqual(item['name'], source[item['number']]['name'])
+                self.assertEqual(item['prompt'], source[item['number']]['prompt'])
+        self.assertEqual(choices[0]['name'], '东方水墨修仙 3D 国漫')
+        self.assertEqual(choices[-1]['name'], '民国年代电影')
+        self.assertIn('低清晰度', common_negative_prompt())
+
+    def test_editing_markdown_updates_choices_without_rewriting_old_work(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            old_work, new_work = base / 'old', base / 'new'
+            save_style(old_work, '旧作', 'xianxia_3d')
+            original = load_style(old_work)['prompt']
+            edited = base / 'presets.md'
+            edited.write_text(style_config.STYLE_SOURCE.read_text(encoding='utf-8').replace(
+                '东方水墨修仙3D国漫，电影级三维动画质感',
+                '东方水墨修仙3D国漫，更新后的电影级三维动画质感', 1), encoding='utf-8')
+            with patch.object(style_config, 'STYLE_SOURCE', edited):
+                self.assertIn('更新后的', presets()[0]['prompt'])
+                save_style(new_work, '新作', 'xianxia_3d')
+            self.assertEqual(load_style(old_work)['prompt'], original)
+            self.assertIn('更新后的', load_style(new_work)['prompt'])
 
 
 if __name__ == '__main__':
