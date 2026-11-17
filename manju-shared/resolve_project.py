@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Locate project-editable rules without inheriting another project's style."""
+"""Locate editable rules and the visual style confirmed for one work."""
 import argparse
 import json
 from pathlib import Path
+from style_config import CONFIG_NAME, load as load_style
 
 
 RULES = {
@@ -12,7 +13,7 @@ RULES = {
 }
 
 
-def resolve(shared_dir, project=None):
+def resolve(shared_dir, project=None, work_dir=None, work_title=None):
     shared_dir = Path(shared_dir).resolve()
     bundled_root = shared_dir.parent
     if project is not None:
@@ -20,7 +21,7 @@ def resolve(shared_dir, project=None):
         if not root.is_dir():
             raise ValueError(f"Project directory not found: {root}")
         mode = "explicit"
-    elif (bundled_root / "视觉风格.md").is_file():
+    elif (bundled_root / "manju-jb").is_dir():
         root, mode = bundled_root, "local-suite"
     else:
         config = shared_dir / "project.json"
@@ -37,22 +38,26 @@ def resolve(shared_dir, project=None):
         if not candidate.is_file():
             candidate = bundled_root / relative
         references[skill] = str(candidate) if candidate.is_file() else None
-    style = root / "视觉风格.md"
+    style = load_style(work_dir, work_title) if work_dir else None
     return {
         "project_root": str(root),
         "selection": mode,
-        "style_file": str(style) if style.is_file() else None,
+        "style_file": str(Path(work_dir).expanduser().resolve() / CONFIG_NAME) if style else None,
+        "style_prompt": style["prompt"] if style else None,
+        "style_preset": style["selected_preset"] if style else None,
         "references": references,
     }
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--project", type=Path, help="Explicit project root; never inherits default style")
+    parser.add_argument("--project", type=Path, help="Explicit rules root")
+    parser.add_argument("--work-dir", type=Path, help="One work's output directory")
+    parser.add_argument("--work-title", help="Reject a style config belonging to another work")
     args = parser.parse_args()
     try:
-        result = resolve(Path(__file__).parent, args.project)
-    except (ValueError, OSError, TypeError) as exc:
+        result = resolve(Path(__file__).parent, args.project, args.work_dir, args.work_title)
+    except (ValueError, OSError, TypeError, json.JSONDecodeError) as exc:
         parser.error(str(exc))
     print(json.dumps(result, ensure_ascii=False, indent=2))
 

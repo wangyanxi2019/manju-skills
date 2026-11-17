@@ -7,7 +7,7 @@ description: 将整份漫剧分镜脚本中的每个15秒分镜组，结合人�
 
 ## 项目规则路径
 
-先读取同级 `../manju-shared/PROJECT_RULES.md`，运行该目录的 `resolve_project.py`；用户指定规则项目时传 `--project`。使用返回的项目路径、规则副本和风格文件，避免桌面可编辑文件与安装副本脱节。没有本技能专属参考文件时继续执行以下流程。
+先读取同级 `../manju-shared/PROJECT_RULES.md`，以分镜所属作品的输出目录和作品名运行 `resolve_project.py --work-dir 作品输出目录 --work-title 作品名`；用户另指定规则项目时才传 `--project`。使用返回的规则副本和作品配置，避免跨作品混用参考图。没有本技能专属参考文件时继续执行以下流程。
 
 ## H5 预览与交接数据
 

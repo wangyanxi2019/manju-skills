@@ -9,6 +9,7 @@ import unittest
 
 import render_preview as render
 from resolve_project import resolve
+from style_config import load as load_style, presets, save as save_style
 
 
 def fixture():
@@ -115,11 +116,10 @@ class PreviewTests(unittest.TestCase):
             rule = project / 'manju-jb/references/分镜脚本.txt'
             rule.parent.mkdir(parents=True)
             rule.write_text('editable')
-            (project / '视觉风格.md').write_text('confirmed')
             (shared / 'project.json').write_text(json.dumps({'default_project_root': str(project)}))
             result = resolve(shared)
             self.assertEqual(result['references']['manju-jb'], str(rule.resolve()))
-            self.assertEqual(result['style_file'], str((project / '视觉风格.md').resolve()))
+            self.assertIsNone(result['style_file'])
 
     def test_explicit_project_does_not_inherit_old_style(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -138,9 +138,45 @@ class PreviewTests(unittest.TestCase):
             root = Path(directory)
             shared = root / 'manju-shared'
             shared.mkdir()
-            (root / '视觉风格.md').write_text('new style')
+            (root / 'manju-jb').mkdir()
             (shared / 'project.json').write_text('{"default_project_root":"/does/not/exist"}')
             self.assertEqual(resolve(shared)['selection'], 'local-suite')
+
+    def test_each_work_has_independent_style_and_no_default(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            shared = base / 'manju-shared'
+            shared.mkdir()
+            (base / 'manju-jb').mkdir()
+            (base / '视觉风格.md').write_text('过时的全局修仙风格')
+            first, second = base / '作品甲-漫剧', base / '作品乙-漫剧'
+            self.assertIsNone(resolve(shared, work_dir=first, work_title='作品甲')['style_prompt'])
+            save_style(first, '作品甲', 'xianxia_3d')
+            save_style(second, '作品乙', 'urban_realistic')
+            self.assertEqual(resolve(shared, work_dir=first, work_title='作品甲')['style_preset'], 'xianxia_3d')
+            self.assertEqual(resolve(shared, work_dir=second, work_title='作品乙')['style_preset'], 'urban_realistic')
+            self.assertNotEqual(load_style(first)['prompt'], load_style(second)['prompt'])
+            self.assertIsNone(resolve(shared)['style_prompt'])
+
+    def test_style_cannot_be_reused_for_a_different_title(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            save_style(base, '作品甲', 'urban_3d')
+            with self.assertRaisesRegex(ValueError, '作品甲'):
+                load_style(base, '作品乙')
+            with self.assertRaisesRegex(ValueError, '作品甲'):
+                save_style(base, '作品乙', 'xianxia_3d')
+
+    def test_custom_style_is_preserved_and_invalid_choice_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            save_style(base, '都市故事', custom_prompt='低饱和都市夜景，胶片质感。')
+            self.assertEqual(load_style(base)['prompt'], '低饱和都市夜景，胶片质感。')
+            self.assertEqual(load_style(base)['selected_preset'], 'custom')
+            with self.assertRaisesRegex(ValueError, 'Unknown preset'):
+                save_style(base, '都市故事', 'not_a_preset')
+            self.assertEqual(load_style(base)['selected_preset'], 'custom')
+            self.assertEqual(len(presets()), 3)
 
 
 if __name__ == '__main__':
