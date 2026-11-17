@@ -18,18 +18,19 @@
 ```bash
 git clone git@github.com:wangyanxi2019/manju-skills.git
 cd manju-skills
-mkdir -p ~/.agents/skills
-cp -R manju-jb manju-rw manju-dj manju-cj manju-fj manju-h3 manju-shared ~/.agents/skills/
+./install.sh
 ```
 
-安装后，把 `~/.agents/skills/manju-shared/project.json` 的 `default_project_root` 改为**本仓库的绝对路径**。这样已安装的 Skill 会读取仓库中可编辑的分镜规则、三视图例子、视频提示词和 `视觉风格.md`。直接在本仓库运行时，解析器会自动使用当前仓库的风格文件；可用下面的命令核对：
+安装脚本会把六个 Skill 和 `manju-shared` 链接到当前仓库。以后直接修改仓库里的规则、风格或程序即可生效，无需手动填写路径。已有的同名安装目录会先备份到 `~/.agents/skills/.manju-skills-backups/`。安装完成后脚本会自动打印所选项目和规则路径。
+
+需要手动核对或重新生成 HTML 时，可运行：
 
 ```bash
 python3 manju-shared/resolve_project.py
 python3 manju-shared/render_preview.py 预览示例/第1集-01_manju-fj.json
 ```
 
-`project.json` 在公开仓库中不包含任何人的本机路径。若另建项目，可在运行解析器时使用 `--project /项目/绝对路径`，并在该目录准备项目规则与已确认的风格文件。`manju-shared/preview_style.css` 控制六个 Skill 共用的离线预览外观；修改后重新运行渲染器生成已有 HTML。
+仓库中的 `project.json` 不包含个人路径。若另建项目，可在运行解析器时使用 `--project /项目/绝对路径`，并在该目录准备项目规则与已确认的风格文件。`manju-shared/preview_style.css` 控制六个 Skill 共用的离线预览外观；修改后重新运行渲染器生成已有 HTML。移动仓库到新位置后重新运行 `./install.sh`，链接会更新。
 
 ## 参考素材与边界
 
