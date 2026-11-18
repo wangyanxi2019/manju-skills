@@ -103,6 +103,18 @@ class PreviewTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Markdown differs from JSON global style", result.stderr)
 
+    def test_storyboard_voice_direction_follows_shot(self):
+        data = fixture()
+        data["skill"] = "manju-jb"
+        data["data"] = {"global_style": "全局风格：水墨三维"}
+        shot = "【镜头01｜4秒：人物开口。】"
+        voice = "【配音指令：人物｜对白：原文】"
+        data["items"][0]["prompts"][0]["text"] = shot + "\n\n" + voice
+        with self.assertRaisesRegex(ValueError, "voice direction must follow its shot"):
+            render.validate(data)
+        data["items"][0]["prompts"][0]["text"] = shot + "\n" + voice
+        self.assertEqual(len(render.validate(data)), 1)
+
     def run_cli(self, source, *flags):
         return subprocess.run([sys.executable, str(Path(render.__file__)), str(source), *flags],
                               capture_output=True, text=True)

@@ -125,6 +125,13 @@ def validate(bundle):
         for prompt in prompts:
             if not isinstance(prompt, dict) or not isinstance(prompt.get("label"), str) or not prompt["label"].strip() or not isinstance(prompt.get("text"), str) or not prompt["text"].strip():
                 raise ValueError(f"item {index} has invalid prompt")
+            if bundle["skill"] == "manju-jb" and global_style:
+                lines = prompt["text"].splitlines()
+                for line_index, line in enumerate(lines):
+                    if line.startswith("【配音指令："):
+                        previous = lines[line_index - 1] if line_index else ""
+                        if not (previous.startswith("【镜头") or previous.startswith("【配音指令：")):
+                            raise ValueError(f"item {index} voice direction must follow its shot")
         if not isinstance(item.get("fields", []), list) or not isinstance(item.get("notes", []), list):
             raise ValueError(f"item {index} fields and notes must be lists")
         for field in item.get("fields", []):

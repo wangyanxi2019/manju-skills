@@ -72,7 +72,7 @@ python3 /path/to/manju-shared/render_preview.py /path/to/作品_范围_manju-fj.
 
 所有领域记录保留 `sources` 数组，元素格式为 `{"file":"输入文件路径","locator":"章节／段落／组号","basis":"original|storyboard|image|visual_fill"}`；`basis` 只取其中一值。视觉补全也要明确说明依据，不能冒充原文事实。ID 沿用上游，不因排序变动重编号；跨文件记录以 `skill + id` 区分。
 
-- `groups[]`：`id`（组号）、`chapter`、`scene`、`characters`、`objects`、`spatial_layout`、`opening_state`、`ending_state`、`duration_seconds`、`shots[]`。每镜保留 `shot_id`、`index`、`duration_seconds`、`text`（完整分镜）、`dialogue[]`、`sound`。对白元素保存 `speaker`、`text`、`kind`（dialogue/os/narration），有声线卡时加 `voice_profile_id`；实际提供音频才有 `audio_path`。不以故事概况替代镜头正文。
+- `groups[]`：`id`（组号）、`chapter`、`scene`、`characters`、`objects`、`spatial_layout`、`opening_state`、`ending_state`、`duration_seconds`、`shots[]`。每镜保留 `shot_id`、`index`、`duration_seconds`、`text`（完整分镜）、`dialogue[]`、`sound`。对白元素保存在实际开始发声的镜头下，保存 `speaker`、`text`、`kind`（dialogue/os/narration）；跨镜持续时另存 `end_shot_id`，不得把整组台词都挂到首镜。有声线卡时加 `voice_profile_id`；实际提供音频才有 `audio_path`。不以故事概况替代镜头正文。
 - `characters[]`：`id`（造型记录）、`character_id`（人物身份）、`name`、`aliases[]`、`appearance`（age/gender/hair_color/hair_style/eye_color/upper_clothing/lower_clothing）、`version`、`scope`。每个外观字段同时保存 `value` 与 `basis`。有发声者另存 `voice_profile`：稳定的 `voice_profile_id`、固定声线 `description`、`register`、`timbre`、`breath`、`pace`、`accent_or_articulation`、`pause_habit`、`scope`、`sources`，以及 `reference_audio`（`status` 为 uploaded/missing；未上传时 `path` 为 null）。声线字段按来源标注，不将描述文本当作实际音频。
 - `objects[]`：`id`（状态记录）、`object_id`（物品身份）、`name`、`aliases[]`、`appearance`（shape/material/color/size/marks，值同样带 basis）、`state`、`scope`。描述值不含人名。
 - `scenes[]`：`id`（状态记录）、`scene_id`（场景身份）、`name`、`aliases[]`、`environment`、`time`、`atmosphere`、`area`（value/basis）、`spatial_layout`、`state`（门／灯等逐对象记录）、`unverified_regions[]`、`scope`。
