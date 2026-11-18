@@ -100,6 +100,9 @@ def validate(bundle):
             raise ValueError(f"{key} must be a list of strings")
     if not isinstance(bundle.get("data", {}), dict):
         raise ValueError("data must be an object")
+    global_style = bundle.get("data", {}).get("global_style")
+    if global_style is not None and (not isinstance(global_style, str) or not global_style.strip()):
+        raise ValueError("data.global_style must be a non-empty string")
     if "subtitle" in bundle and not isinstance(bundle["subtitle"], str):
         raise ValueError("subtitle must be a string")
     items = bundle.get("items")
@@ -140,6 +143,8 @@ def markdown(bundle, items):
     lines = [f"# {bundle['title']}", ""]
     if bundle.get("subtitle"):
         lines.extend([bundle["subtitle"], ""])
+    if bundle["skill"] == "manju-jb" and bundle.get("data", {}).get("global_style"):
+        lines.extend([bundle["data"]["global_style"], ""])
     for item in items:
         lines.extend([f"## {item['title']}", ""])
         if item.get("summary"):
@@ -190,6 +195,13 @@ def preview(bundle, items, json_name, md_name=None):
     cards_class = "cards single" if len(items) == 1 else "cards"
     prompt_count = sum(len(item["prompts"]) for item in items)
     source_count = len(bundle.get("source_files", []))
+    global_style = bundle.get("data", {}).get("global_style") if bundle["skill"] == "manju-jb" else None
+    global_style_html = (
+        '<section class="global-setting" aria-label="全局风格与通用约束">'
+        '<div class="prompt-head"><h2>全局风格与通用约束</h2>'
+        '<button class="copy" type="button" data-copy="global-style" aria-label="复制全局风格与通用约束">复制</button></div>'
+        f'<pre id="global-style"><code>{e(global_style)}</code></pre></section>'
+    ) if global_style else ""
     return (
         '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -201,6 +213,7 @@ def preview(bundle, items, json_name, md_name=None):
         f'<div class="metric"><span class="metric-label">内容条目</span><strong class="metric-value">{len(items)}</strong><span class="metric-detail">当前文档范围</span></div>'
         f'<div class="metric"><span class="metric-label">可复制提示词</span><strong class="metric-value">{prompt_count}</strong><span class="metric-detail">逐条独立复制</span></div>'
         f'<div class="metric"><span class="metric-label">来源文件</span><strong class="metric-value">{source_count}</strong><span class="metric-detail">以 JSON 所列为准</span></div></div>'
+        f'{global_style_html}'
         '<div class="toolbar"><h2><span class="section-no">01</span>内容与提示词 <span class="visible">匹配 <span id="visible-count">'
         f'{len(items)}</span> 项</span></h2><input id="search" class="search" type="search" placeholder="搜索人物、场景、镜头或提示词" aria-label="搜索内容"></div>'
         f'<div class="{cards_class}">{"".join(sections)}</div><p class="{empty_class}" id="empty">没有匹配内容，请查看核对记录。</p>'
@@ -225,6 +238,9 @@ def main():
         md_text = markdown(bundle, items) if args.write_markdown else None
         if md_text is None and md_path.exists():
             existing = md_path.read_text(encoding="utf-8")
+            global_style = bundle.get("data", {}).get("global_style") if bundle["skill"] == "manju-jb" else None
+            if global_style and global_style not in existing:
+                raise ValueError("Markdown differs from JSON global style")
             for item in items:
                 for prompt in item["prompts"]:
                     if prompt["text"] not in existing:

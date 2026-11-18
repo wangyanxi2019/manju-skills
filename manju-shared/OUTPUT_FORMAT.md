@@ -59,7 +59,7 @@ python3 /path/to/manju-shared/render_preview.py /path/to/作品_范围_manju-fj.
 
 下游读取 JSON 时先核对 `skill` 与 `schema_version`。原始小说、分镜或图片仍是最终事实来源，JSON 是已确认信息的索引。缺少上游 JSON 时继续读取原始素材。
 
-- `manju-jb`：根 `data.groups[]` 保留组号、章节、场景、人物、物品、站位、各镜时长与完整文字、台词、音效和结尾状态。每组 `items[].prompts[]` 放可复制的完整分镜组。
+- `manju-jb`：根 `data.global_style` 是与 Markdown 标题下完全一致的字符串，包含一次全局风格和通用摄影、声音约束；根 `data.groups[]` 保留组号、章节、场景、人物、物品、站位、各镜时长与完整文字、台词、音效和结尾状态。每组 `items[].prompts[]` 只放可复制的完整分镜组正文，不重复风格。HTML 在组卡片前单独展示一次全局设置并提供复制按钮。单组投喂时由调用方读取 `data.global_style`，与该组正文组合；旧 JSON 没有该字段时从原始 Markdown 顶部读取，不能推断或套用其他作品的风格。
 - `manju-rw`：根 `data.characters[]` 保留人物 ID、规范名、代称、外貌字段、服装版本与出处。每个角色 item 有人物形象和三视图两条 Prompt。
 - `manju-dj`：根 `data.objects[]` 保留物品 ID、代称、外观五字段、状态版本与出处。每个物品状态 item 有单物品图 Prompt。
 - `manju-cj`：根 `data.scenes[]` 保留场景 ID、代称、固定空间坐标、面积依据和状态版本。每个场景状态 item 有无人场景图及三视图 Prompt。

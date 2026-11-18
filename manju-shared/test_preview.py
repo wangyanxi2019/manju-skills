@@ -74,6 +74,35 @@ class PreviewTests(unittest.TestCase):
         output = render.markdown(data, render.validate(data))
         self.assertIn("````text\n" + text + "\n````", output)
 
+    def test_storyboard_global_style_is_once_before_groups(self):
+        data = fixture()
+        data["skill"] = "manju-jb"
+        data["data"] = {"global_style": "全局风格：水墨三维\n全局摄影与声音约束：无SRT，无音乐。"}
+        data["items"][0]["prompts"][0]["text"] = "【第1集-01｜15秒】\n场景：房内"
+        data["items"].append({"id": "02", "title": "第二组", "prompts": [
+            {"label": "分镜组正文", "text": "【第1集-02｜15秒】\n场景：门外"}]})
+        items = render.validate(data)
+        output_md = render.markdown(data, items)
+        output_html = render.preview(data, items, "story.json")
+        style = data["data"]["global_style"]
+        self.assertEqual(output_md.count(style), 1)
+        self.assertLess(output_md.index(style), output_md.index("【第1集-01｜15秒】"))
+        self.assertEqual(output_html.count(render.e(style)), 1)
+        self.assertIn('data-copy="global-style"', output_html)
+        self.assertEqual(output_html.count('class="card"'), 2)
+
+    def test_storyboard_global_style_must_match_existing_markdown(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "story.json"
+            data = fixture()
+            data["skill"] = "manju-jb"
+            data["data"] = {"global_style": "全局风格：水墨三维"}
+            source.write_text(json.dumps(data), encoding="utf-8")
+            source.with_suffix(".md").write_text("# 分镜\n" + data["items"][0]["prompts"][0]["text"], encoding="utf-8")
+            result = self.run_cli(source)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Markdown differs from JSON global style", result.stderr)
+
     def run_cli(self, source, *flags):
         return subprocess.run([sys.executable, str(Path(render.__file__)), str(source), *flags],
                               capture_output=True, text=True)
