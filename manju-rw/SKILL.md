@@ -13,7 +13,9 @@ description: 从小说原文和漫剧分镜脚本提取全部出现或提及的�
 
 每次交付除原有 Markdown 文件外，再保存同名 `.json` 和 `.html`。Markdown 继续遵守本 Skill 原有的正式格式；JSON 采用同级 `../manju-shared/OUTPUT_FORMAT.md` 的结构，`items[].prompts[].text` 必须与 Markdown 中对应的完整 Prompt 或分镜组正文一致。按该文档的 `data` 约定保留本 Skill 的结构化事实与来源，供后续 Skill 读取；不能用摘要替代完整镜头、台词、物品、人物或状态信息。若上游已有 JSON，先核对其组号、来源与原始文件，再复用已确认的字段。
 
-保存 JSON 后运行 `python3 ../manju-shared/render_preview.py 输出文件.json`（从本 Skill 目录解析相对路径，或使用脚本绝对路径），生成同名离线 H5 `.html`。渲染器默认不改写 Markdown。逐项检查 HTML 条目数与 Markdown/JSON 一致、中文可读、手机宽度下不横向溢出，并实际点击一条 Prompt 的“复制”按钮验证复制正文。最后同时给用户 Markdown、JSON 和 HTML 的链接。
+保存 JSON 并通过下述生图检查后运行 `python3 ../manju-shared/render_preview.py 输出文件.json`（从本 Skill 目录解析相对路径，或使用脚本绝对路径），生成同名离线 H5 `.html`。渲染器默认不改写 Markdown。逐项检查 HTML 条目数与 Markdown/JSON 一致、中文可读、手机宽度下不横向溢出，并实际点击一条 Prompt 的“复制”按钮验证复制正文。最后同时给用户 Markdown、JSON 和 HTML 的链接。
+
+生图前读取同级 `../manju-shared/IMAGE_PROMPT_RULES.md`。年龄、服装等具体画面特征写入 Prompt；“原文／视觉补全设定”、适用章节、身份依据和武器是否属于服装等核对说明留在人物资料或 JSON `data`，不要把资料卡原句拼进可复制 Prompt。交付前运行 `python3 ../manju-shared/lint_image_prompts.py 输出文件.json`，修正命中的生图 Prompt，再同步 Markdown 与 HTML；声线 Prompt 不受此检查。
 
 
 ## 输入与核对

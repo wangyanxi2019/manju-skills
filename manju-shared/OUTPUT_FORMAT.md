@@ -1,6 +1,6 @@
 # 漫剧输出格式
 
-每个 Skill 交付同名的 `.json`、`.md`、`.html`。按各 Skill 原有模板写 Markdown，同时保存相同 Prompt 的 JSON，然后运行 `render_preview.py` 生成离线 HTML。HTML 在手机和桌面浏览器打开，Prompt 卡片有“复制”按钮和搜索框，无外部字体、脚本或服务依赖。渲染器默认不覆盖 Markdown；只有在没有既定 Markdown 格式时才加 `--write-markdown` 自动生成。
+每个 Skill 交付同名的 `.json`、`.md`、`.html`。按各 Skill 原有模板写 Markdown，同时保存相同 Prompt 的 JSON；人物、道具、场景、四宫格先运行 `lint_image_prompts.py` 检查可复制生图 Prompt，再运行 `render_preview.py` 生成离线 HTML。HTML 在手机和桌面浏览器打开，Prompt 卡片有“复制”按钮和搜索框，无外部字体、脚本或服务依赖。渲染器默认不覆盖 Markdown；只有在没有既定 Markdown 格式时才加 `--write-markdown` 自动生成。
 
 ## 命令
 
