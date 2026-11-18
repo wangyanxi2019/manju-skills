@@ -10,6 +10,18 @@ CONFIG_NAME = "视觉风格配置.json"
 PRESETS_FILE = Path(__file__).with_name("style_presets.json")
 STYLE_SOURCE = Path(__file__).parent / "references" / "漫剧生图影视风格预设.md"
 VARIANTS_SOURCE = Path(__file__).parent / "references" / "漫剧资产风格变体.md"
+CHARACTER_SCENE_CUES = (
+    "山水", "山川", "云雾", "体积云", "体积光", "自然景物", "天气", "雨后", "潮湿街道",
+    "街道", "城市夜景", "霓虹招牌", "招牌", "建筑", "宫殿", "室内", "室外", "场景", "背景",
+    "环境光", "环境布光", "窗边", "门窗", "陈设", "空间纵深", "透视构图", "背景虚化",
+    "景深", "广角", "火光照明", "月光", "阳光", "烟雾", "光源方向", "城市环境", "自然环境"
+)
+
+
+def validate_character_prompt(prompt, label="人物资产风格"):
+    hits = [cue for cue in CHARACTER_SCENE_CUES if cue in prompt]
+    if hits:
+        raise ValueError(f"{label} must not contain scene elements: {', '.join(hits)}")
 
 
 def source_prompts():
@@ -38,7 +50,7 @@ def asset_variants():
     source = VARIANTS_SOURCE.read_text(encoding="utf-8")
     headings = list(re.finditer(r"^## (\d{2})｜[^\n]+$", source, re.MULTILINE))
     variants = {}
-    labels = {"base": "通用风格", "scene": "无人场景风格", "prop": "单物品风格"}
+    labels = {"character": "人物资产风格", "base": "通用风格", "scene": "无人场景风格", "prop": "单物品风格"}
     for index, heading in enumerate(headings):
         number = heading.group(1)
         if number in variants:
@@ -74,7 +86,9 @@ def presets():
     for item in items:
         if not isinstance(item.get("medium"), str) or not item["medium"].strip():
             raise ValueError(f"Invalid preset entry: {item.get('id')}")
-        result.append({**item, **source[item["number"]], **variants[item["number"]]})
+        entry = {**item, **source[item["number"]], **variants[item["number"]]}
+        validate_character_prompt(entry["character_prompt"], f"{item['number']} character asset style")
+        result.append(entry)
     return result
 
 
@@ -94,9 +108,11 @@ def load(work_dir, work_title=None):
     if prompts is not None:
         if not isinstance(prompts, dict) or any(
             not isinstance(prompts.get(key), str) or not prompts[key].strip()
-            for key in ("base", "character", "scene", "prop")
-        ) or prompts["character"] != value["prompt"]:
+            for key in ("character", "base", "scene", "prop")
+        ) or (value.get("version", 2) < 3 and prompts["character"] != value["prompt"]):
             raise ValueError(f"Incomplete subject-specific style prompts: {path}")
+        if value.get("version", 2) >= 3:
+            validate_character_prompt(prompts["character"], f"Character style in {path}")
     return value
 
 
@@ -124,18 +140,19 @@ def save(work_dir, work_title, preset_id=None, custom_prompt=None,
         if match is None:
             raise ValueError(f"Unknown preset: {preset_id}")
         prompt, chosen, medium = match["prompt"], preset_id, match["medium"]
-        variants = {"base": match["base_prompt"], "character": prompt,
+        variants = {"base": match["base_prompt"], "character": match["character_prompt"],
                     "scene": match["scene_prompt"], "prop": match["prop_prompt"]}
     else:
         prompt, chosen, medium = custom_prompt.strip(), "custom", "custom"
         if not prompt:
             raise ValueError("Custom style prompt cannot be empty")
+        validate_character_prompt(prompt, "Custom character asset style")
         values = (base_prompt, scene_prompt, prop_prompt)
         if any(not isinstance(value, str) or not value.strip() for value in values):
             raise ValueError("Custom style requires base, scene and prop variants")
         variants = {"base": base_prompt.strip(), "character": prompt,
                     "scene": scene_prompt.strip(), "prop": prop_prompt.strip()}
-    value = {"version": 2, "work_title": work_title.strip(), "status": "confirmed",
+    value = {"version": 3, "work_title": work_title.strip(), "status": "confirmed",
              "selected_preset": chosen, "medium": medium, "prompt": prompt, "prompts": variants}
     if previous == value:
         return directory / CONFIG_NAME
@@ -143,18 +160,18 @@ def save(work_dir, work_title, preset_id=None, custom_prompt=None,
 
 
 def upgrade(work_dir, work_title):
-    """Explicitly add variants to a legacy preset while retaining its old character prompt."""
+    """Upgrade a confirmed legacy preset to its dedicated scene-free character asset variant."""
     directory = Path(work_dir).expanduser().resolve()
     previous = load(directory, work_title)
     if previous is None:
         raise ValueError("No saved style config to upgrade")
-    if previous.get("prompts"):
+    if previous.get("version", 1) >= 3:
         return directory / CONFIG_NAME
     match = next((item for item in presets() if item["id"] == previous["selected_preset"]), None)
     if match is None:
-        raise ValueError("Legacy custom style needs reviewed base, scene and prop variants")
-    value = {**previous, "version": 2, "medium": previous.get("medium") or match["medium"],
-             "prompts": {"base": match["base_prompt"], "character": previous["prompt"],
+        raise ValueError("Legacy custom style needs reviewed character, base, scene and prop variants")
+    value = {**previous, "version": 3, "medium": previous.get("medium") or match["medium"],
+             "prompts": {"base": match["base_prompt"], "character": match["character_prompt"],
                          "scene": match["scene_prompt"], "prop": match["prop_prompt"]}}
     return write_config(directory, value)
 

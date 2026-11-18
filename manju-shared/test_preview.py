@@ -201,7 +201,8 @@ class PreviewTests(unittest.TestCase):
             self.assertEqual(resolve(shared, work_dir=second, work_title='作品乙')['style_preset'], 'urban_realistic')
             self.assertNotEqual(load_style(first)['prompt'], load_style(second)['prompt'])
             selected = resolve(shared, work_dir=first, work_title='作品甲')
-            self.assertEqual(selected['style_character_prompt'], load_style(first)['prompt'])
+            self.assertEqual(selected['style_character_prompt'], presets()[0]['character_prompt'])
+            self.assertNotEqual(selected['style_character_prompt'], load_style(first)['prompt'])
             self.assertNotEqual(selected['style_scene_prompt'], selected['style_character_prompt'])
             self.assertNotEqual(selected['style_prop_prompt'], selected['style_character_prompt'])
             self.assertIsNone(resolve(shared)['style_prompt'])
@@ -266,7 +267,7 @@ class PreviewTests(unittest.TestCase):
             self.assertEqual(load_style(old_work)['prompt'], original)
             self.assertIn('更新后的', load_style(new_work)['prompt'])
 
-    def test_legacy_preset_upgrade_keeps_character_snapshot(self):
+    def test_legacy_preset_upgrade_uses_dedicated_character_asset_variant(self):
         with tempfile.TemporaryDirectory() as directory:
             work = Path(directory)
             legacy = {'version': 1, 'work_title': '旧作', 'status': 'confirmed',
@@ -277,7 +278,7 @@ class PreviewTests(unittest.TestCase):
             upgrade(work, '旧作')
             saved = load_style(work, '旧作')
             self.assertEqual(saved['prompt'], legacy['prompt'])
-            self.assertEqual(saved['prompts']['character'], legacy['prompt'])
+            self.assertEqual(saved['prompts']['character'], presets()[0]['character_prompt'])
             self.assertIn('三维环境', saved['prompts']['scene'])
             self.assertIn('三维物品', saved['prompts']['prop'])
 
