@@ -11,8 +11,8 @@ from unittest.mock import patch
 import render_preview as render
 import style_config
 from resolve_project import resolve
-from style_config import (common_negative_prompt, load as load_style, presets,
-                          save as save_style, source_prompts)
+from style_config import (asset_variants, common_negative_prompt, load as load_style,
+                          presets, save as save_style, source_prompts, upgrade)
 
 
 def fixture():
@@ -159,6 +159,10 @@ class PreviewTests(unittest.TestCase):
             self.assertEqual(resolve(shared, work_dir=first, work_title='作品甲')['style_preset'], 'xianxia_3d')
             self.assertEqual(resolve(shared, work_dir=second, work_title='作品乙')['style_preset'], 'urban_realistic')
             self.assertNotEqual(load_style(first)['prompt'], load_style(second)['prompt'])
+            selected = resolve(shared, work_dir=first, work_title='作品甲')
+            self.assertEqual(selected['style_character_prompt'], load_style(first)['prompt'])
+            self.assertNotEqual(selected['style_scene_prompt'], selected['style_character_prompt'])
+            self.assertNotEqual(selected['style_prop_prompt'], selected['style_character_prompt'])
             self.assertIsNone(resolve(shared)['style_prompt'])
 
     def test_style_cannot_be_reused_for_a_different_title(self):
@@ -173,9 +177,14 @@ class PreviewTests(unittest.TestCase):
     def test_custom_style_is_preserved_and_invalid_choice_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            save_style(base, '都市故事', custom_prompt='低饱和都市夜景，胶片质感。')
+            with self.assertRaisesRegex(ValueError, 'requires base, scene and prop'):
+                save_style(base, '都市故事', custom_prompt='低饱和都市夜景，胶片质感。')
+            save_style(base, '都市故事', custom_prompt='低饱和都市夜景，胶片质感。',
+                       base_prompt='低饱和胶片质感', scene_prompt='低饱和都市环境胶片质感',
+                       prop_prompt='低饱和单物品胶片质感')
             self.assertEqual(load_style(base)['prompt'], '低饱和都市夜景，胶片质感。')
             self.assertEqual(load_style(base)['selected_preset'], 'custom')
+            self.assertEqual(load_style(base)['prompts']['scene'], '低饱和都市环境胶片质感')
             with self.assertRaisesRegex(ValueError, 'Unknown preset'):
                 save_style(base, '都市故事', 'not_a_preset')
             self.assertEqual(load_style(base)['selected_preset'], 'custom')
@@ -183,12 +192,19 @@ class PreviewTests(unittest.TestCase):
 
     def test_all_source_presets_are_available_verbatim(self):
         source = source_prompts()
+        variants = asset_variants()
         choices = presets()
         self.assertEqual(set(source), {item['number'] for item in choices})
+        self.assertEqual(set(source), set(variants))
         for item in choices:
             with self.subTest(number=item['number']):
                 self.assertEqual(item['name'], source[item['number']]['name'])
                 self.assertEqual(item['prompt'], source[item['number']]['prompt'])
+                for key in ('base_prompt', 'scene_prompt', 'prop_prompt'):
+                    self.assertEqual(item[key], variants[item['number']][key])
+                for key in ('scene_prompt', 'prop_prompt'):
+                    self.assertFalse(any(word in item[key] for word in
+                                         ('人物', '演员', '皮肤', '五官', '发丝', '服饰', '角色')))
         self.assertEqual(choices[0]['name'], '东方水墨修仙 3D 国漫')
         self.assertEqual(choices[-1]['name'], '民国年代电影')
         self.assertIn('低清晰度', common_negative_prompt())
@@ -208,6 +224,21 @@ class PreviewTests(unittest.TestCase):
                 save_style(new_work, '新作', 'xianxia_3d')
             self.assertEqual(load_style(old_work)['prompt'], original)
             self.assertIn('更新后的', load_style(new_work)['prompt'])
+
+    def test_legacy_preset_upgrade_keeps_character_snapshot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            work = Path(directory)
+            legacy = {'version': 1, 'work_title': '旧作', 'status': 'confirmed',
+                      'selected_preset': 'xianxia_3d', 'medium': '3D 动画',
+                      'prompt': '旧版已确认的人物风格'}
+            (work / style_config.CONFIG_NAME).write_text(json.dumps(legacy), encoding='utf-8')
+            self.assertIsNone(resolve(work, work_dir=work, work_title='旧作')['style_scene_prompt'])
+            upgrade(work, '旧作')
+            saved = load_style(work, '旧作')
+            self.assertEqual(saved['prompt'], legacy['prompt'])
+            self.assertEqual(saved['prompts']['character'], legacy['prompt'])
+            self.assertIn('三维环境', saved['prompts']['scene'])
+            self.assertIn('三维物品', saved['prompts']['prop'])
 
 
 if __name__ == '__main__':
